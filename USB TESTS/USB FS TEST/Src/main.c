@@ -126,7 +126,7 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 		ModbusProcess();
-		RTC_GetDateTime();
+		RTC_GetDateTime();// Read RTC registers
 		//HAL_Delay(1000);
   }
   /* USER CODE END 3 */
