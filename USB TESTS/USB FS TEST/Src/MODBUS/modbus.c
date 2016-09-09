@@ -29,10 +29,10 @@ extern RTC_DateTypeDef cDate;
 
 #define TEST_WITHOUT_CRC  // Comment for normal work!
 
-enum ModbusStates modbus_states;
+enum ModbusStates mobus_states;
 enum ModbusErrors modbus_errors;
 
-//static uint8_t state = INIT, _state = (INIT + 1), flag = 0;
+//uint8_t state = 0, _state = 1, flag = 0;
 //uint8_t crc_high_byte = 0, crc_low_byte = 0;
 //uint8_t kop = 0;// Code of function
 //uint16_t number_register = 0;
@@ -48,7 +48,7 @@ enum ModbusErrors modbus_errors;
 */
 void ModbusProcess(void)
 {
-	static uint8_t state = INIT, _state = (INIT + 1), flag = 0;
+	static uint8_t state = INIT, _state = INIT+1, flag = 0;
 	uint8_t crc_high_byte = 0, crc_low_byte = 0;
 	uint8_t res = 0;
 	static uint8_t kop = 0;// Code of function
@@ -66,7 +66,7 @@ void ModbusProcess(void)
 			//----------------------------------------------
 			state = WAIT_MESSAGE;
 		break;
-		case WAIT_MESSAGE:
+		case 1:
 			if (flag) 
 			{
 				FlagModbusRecieveData = 0;
@@ -139,7 +139,7 @@ void ModbusProcess(void)
 				{
 					number_register = rx_buffer[2];
 					//data_register = rx_buffer[3];
-					state = MODE_WRITE_CLOCK;
+					state = MODE_WRITE_CM1K;
 				}
 				else
 				{
@@ -149,7 +149,10 @@ void ModbusProcess(void)
 			}
 			//
 			else if (kop == READ_REGISTER)	// Read one register
+			{
 				data_length = 4;
+				state = MODE_READ_CM1K;
+			}
 			//
 			else
 			{
@@ -165,7 +168,7 @@ void ModbusProcess(void)
 			if (res == HAL_OK)
 			{
 				RXbufferCopy();
-				CDC_Transmit_FS(tx_buffer, sizeof(tx_buffer));
+				CDC_Transmit_FS(tx_buffer, 19);
 			}
 			else
 			{
@@ -176,10 +179,11 @@ void ModbusProcess(void)
 				tx_buffer[KOD_ERROR + 1] = (uint8_t)(crc);//low CRC;
 				tx_buffer[KOD_ERROR + 2] = (uint8_t)(crc >> 8);//high CRC;
 				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
-			}				
+			}		
+			//FlagModbusRecieveData = 0;			
 			state = WAIT_MESSAGE;	
 		break;
-		case MODE_READ_CLOCK:
+		case 5:
 			// Read data from RTC registers
 			//res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 1, 1000);
 			BufferClear(tx_buffer);
@@ -193,7 +197,7 @@ void ModbusProcess(void)
 				tx_buffer[4] = 0x00;
 				tx_buffer[5] = 0x00;
 				//CRC16();
-				CDC_Transmit_FS(tx_buffer, 6);
+				CDC_Transmit_FS(tx_buffer, 19);
 			}
 			else
 			{
@@ -202,84 +206,14 @@ void ModbusProcess(void)
 			state = WAIT_MESSAGE;	
 		break;
 		case MODE_WRITE_CM1K:
-			
+			state = WAIT_MESSAGE;
 		break;
 		case MODE_READ_CM1K:
-			
-		break;
-		case MODE_LEARN:
-			CogniLearn();
-			CDC_Transmit_FS(Msg1,strlen(Msg1));
-			state = WAIT_MESSAGE;			
-		break;
-		case MODE_RECOGNIZE:
-			CogniRecognize();
-			CDC_Transmit_FS(Msg2,strlen(Msg2));
-			state = WAIT_MESSAGE;			
-		break;
-		case MODE_SAVE:
-			CogniSave();
-			CDC_Transmit_FS(Msg3,strlen(Msg3));
-			state = WAIT_MESSAGE;				
-		break;
-		case MODE_RESTORE:
-			CogniRestore();
-			CDC_Transmit_FS(Msg4,strlen(Msg4));
-			state = WAIT_MESSAGE;			
-		break;
-		case MODE_TEST:
-			CogniTest();
-			CDC_Transmit_FS(Msg5,strlen(Msg5));
 			state = WAIT_MESSAGE;
-		break;
-		/*
-		case MODE_WRITE_TIME:
-			buffer_clock[0] = 0;
-			buffer_clock[1] = 0;
-			buffer_clock[2] = 0;
-			uint8_t result = HAL_I2C_Mem_Write(&hi2c1, I2C_ADDRESS, 0x00, 1, buffer_clock, 3, 1000);
-			if (result == 0)
-			{
-				if (kop == WRITE_SINGLE_REGISTER)
-				{
-					
-					CDC_Transmit_FS(tx_buffer, WRITE_SINGLE_REGISTER_BYTES);
-				}
-				else if (kop == WRITE_MULTIPLE_REGISTERS)
-				{
-					
-					CDC_Transmit_FS(tx_buffer, WRITE_SINGLE_REGISTER_BYTES);
-				}
-			}
-			else
-			{
-				
-			}
-		break;
-		*/	
-		case SEND_MESSAGE:
-			RXbufferCopy();
-			CDC_Transmit_FS(tx_buffer, sizeof(tx_buffer));
-			//----------------------------------------------------
-			state = WAIT_MESSAGE;
-		break;
-		case SEND_ERROR:
-			tx_buffer[ADDRESS_BYTE] = UNIT_ADDRESS;
-			tx_buffer[KOP_BYTE] = 0x8F;
-			tx_buffer[KOD_ERROR] = ModbusErrorRegister;
-			crc = CRCProcess(tx_buffer, ERROR_MESSAGE_SIZE - 2);
-			tx_buffer[KOD_ERROR + 1] = (uint8_t)(crc);//low CRC;
-			tx_buffer[KOD_ERROR + 2] = (uint8_t)(crc >> 8);//high CRC;
-			CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
-			//----------------------------------------------------
-			state = WAIT_MESSAGE;
-		break;
-		case WAIT_RESET:
-			
 		break;
 		default:
 		{
-			
+			state = INIT;
 		}
 	}
 }
