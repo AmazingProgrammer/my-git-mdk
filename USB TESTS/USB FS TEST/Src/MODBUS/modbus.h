@@ -65,8 +65,8 @@ void ModbusProcess(void);
 void ModbusUnpack(void);
 void ModbusPack(void);
 void BufferClear(uint8_t *ptr);
-//void TXbufferClear(void);
 uint16_t CRCProcess(uint8_t *ptr, uint8_t length);
-void RXbufferCopy(void);
+void RXbufferCopy(uint8_t amount);
+void FormErrorMessage(uint8_t *ptr, uint8_t kod_err);
 
 #endif

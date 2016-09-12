@@ -24,28 +24,26 @@ uint8_t x = 0;
 char timestr[40];
 
 
-void CommandProcess(void)
+void LedControl(uint8_t led)
 {
-	if (SystemControlRegister == 0x00)
+	if (led == 0x00)
 		return;
-	if (SystemControlRegister == 0x01)
+	if (led & 0x01)
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12,GPIO_PIN_SET); 
 	else
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12,GPIO_PIN_RESET);
-	if (SystemControlRegister == 0x02)
+	if (led & 0x02)
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET); 
 	else
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET);
-	if (SystemControlRegister == 0x04)
+	if (led & 0x04)
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14,GPIO_PIN_SET); 
 	else
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14,GPIO_PIN_RESET);
-	if (SystemControlRegister == 0x08)
+	if (led & 0x08)
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15,GPIO_PIN_SET); 
 	else
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15,GPIO_PIN_RESET);
-	
-	SystemControlRegister = 0x00;
 }
 
 /*

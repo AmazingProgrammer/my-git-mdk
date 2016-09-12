@@ -18,8 +18,7 @@ extern uint8_t buffer_clock[];
 #define CLOCK_BUFFER_SIZE (18)
 #define I2C_ADDRESS (0xD0)
 
-void CommandProcess(void);
-//void TimeReadProcess(void);
+void LedControl(uint8_t led);
 HAL_StatusTypeDef RTC_SetDateTime(uint8_t sec,uint8_t min,uint8_t hour,uint8_t date,uint8_t month,uint8_t year) ;
 HAL_StatusTypeDef RTC_GetDateTimeToArray(uint8_t *ptr);
 void RTC_GetDateTime(void);

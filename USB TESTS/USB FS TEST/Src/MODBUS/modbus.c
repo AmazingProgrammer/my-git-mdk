@@ -69,6 +69,7 @@ void ModbusProcess(void)
 		case 1:
 			if (flag) 
 			{
+				LedControl(0);
 				FlagModbusRecieveData = 0;
 				LCD_DisplayStringLine(100,100,"WAIT COMMAND..", LCD_COLOR_WHITE, LCD_COLOR_BLUE);
 			}
@@ -80,6 +81,7 @@ void ModbusProcess(void)
 			}
 		break;
 		case ADDRESS_CONTROL:
+			if (flag) LedControl(1);
 			if (rx_buffer[ADDRESS_BYTE] == UNIT_ADDRESS)
 				state = CRC_CONTROL;
 			else 
@@ -177,17 +179,19 @@ void ModbusProcess(void)
 														rx_buffer[AMOUNT_REGISTERS_BYTE+10],rx_buffer[AMOUNT_REGISTERS_BYTE+12]);
 			if (res == HAL_OK)
 			{
-				RXbufferCopy();
+				LedControl(3);
+				RXbufferCopy(19);
 				CDC_Transmit_FS(tx_buffer, 19);
 			}
 			else
 			{
-				tx_buffer[ADDRESS_BYTE] = UNIT_ADDRESS;
-				tx_buffer[KOP_BYTE] = 0x8F;
-				tx_buffer[KOD_ERROR] = ModbusErrorRegister;
-				crc = CRCProcess(tx_buffer, ERROR_MESSAGE_SIZE - 2);
-				tx_buffer[KOD_ERROR + 1] = (uint8_t)(crc);//low CRC;
-				tx_buffer[KOD_ERROR + 2] = (uint8_t)(crc >> 8);//high CRC;
+				//tx_buffer[ADDRESS_BYTE] = UNIT_ADDRESS;
+				//tx_buffer[KOP_BYTE] = 0x8F;
+				//tx_buffer[KOD_ERROR] = ModbusErrorRegister;
+				//crc = CRCProcess(tx_buffer, ERROR_MESSAGE_SIZE - 2);
+				//tx_buffer[KOD_ERROR + 1] = (uint8_t)(crc);//low CRC;
+				//tx_buffer[KOD_ERROR + 2] = (uint8_t)(crc >> 8);//high CRC;
+				FormErrorMessage(tx_buffer, 0);
 				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
 			}		
 			//FlagModbusRecieveData = 0;			
@@ -198,8 +202,9 @@ void ModbusProcess(void)
 			//res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 1, 1000);
 			BufferClear(tx_buffer);
 			res = RTC_GetDateTimeToArray(tx_buffer);
-			if (res == 0)
+			if (res == HAL_OK)
 			{
+				LedControl(5);
 				tx_buffer[0] = UNIT_ADDRESS;
 				tx_buffer[1] = READ_REGISTER;
 				tx_buffer[2] = 0x01;
@@ -215,7 +220,8 @@ void ModbusProcess(void)
 			else
 			{
 				// Send Error array
-				CDC_Transmit_FS(tx_buffer, 19);
+				FormErrorMessage(tx_buffer, 0);
+				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
 			}
 			state = WAIT_MESSAGE;	
 		break;
@@ -225,15 +231,18 @@ void ModbusProcess(void)
 			buffer8[1] = rx_buffer[5];
 			buffer8[0] = rx_buffer[6];
 			res = HAL_I2C_Mem_Write(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 2, 1000);
-			if (res == 0)
+			if (res == HAL_OK)
 			{
+				LedControl(3);
+				RXbufferCopy(9);
 				// Send received array
-				// CDC_Transmit_FS(tx_buffer, 19);
+				CDC_Transmit_FS(tx_buffer, 9);
 			}
 			else
 			{
 				// Send Error array
-				// CDC_Transmit_FS(tx_buffer, 19);
+				FormErrorMessage(tx_buffer, 0);
+				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
 			}
 			state = WAIT_MESSAGE;
 		break;
@@ -241,8 +250,9 @@ void ModbusProcess(void)
 			// Read data from RTC registers
 			number_register = rx_buffer[3];
 			res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 2, 1000);
-			if (res == 0)
+			if (res == HAL_OK)
 			{
+				LedControl(5);
 				tx_buffer[0] = UNIT_ADDRESS;
 				tx_buffer[1] = READ_REGISTER;
 				tx_buffer[2] = 0x00;
@@ -261,7 +271,8 @@ void ModbusProcess(void)
 			else
 			{
 				// Send Error array
-				//CDC_Transmit_FS(tx_buffer, 19);
+				FormErrorMessage(tx_buffer, 0);
+				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
 			}
 			state = WAIT_MESSAGE;
 		break;
@@ -270,14 +281,6 @@ void ModbusProcess(void)
 			state = INIT;
 		}
 	}
-}
-
-/*
-
-*/
-void ModbusPack(void)
-{
-
 }
 
 /*
@@ -302,10 +305,18 @@ void BufferClear(uint8_t *ptr)
 /*
 
 */
-void RXbufferCopy(void)
+void RXbufferCopy(uint8_t amount)
 {
-	for (uint8_t temp = 0; temp < RX_BUFFER_SIZE; temp++)
+	uint8_t limit = 0;
+	
+	if (amount < RX_BUFFER_SIZE)
+		limit = amount;
+	else
+		limit = RX_BUFFER_SIZE;
+	
+	for (uint8_t temp = 0; temp < limit; temp++)
 	{
+		tx_buffer[temp] = 0;
 		tx_buffer[temp] = rx_buffer[temp];
 	}
 }
@@ -340,3 +351,24 @@ uint16_t CRCProcess(uint8_t *ptr, uint8_t length)
 	}
 	return crc_value;
 }
+
+/*
+	* @brief  Create error message for Modbus frame
+  * Author  Andrew A. Ivanov 
+	* 12/09/2016
+  * @param  ptr - pointer to data buffer
+						kod_err - number of error 
+  * @retval None
+*/
+void FormErrorMessage(uint8_t *ptr, uint8_t kod_err)
+{
+	uint8_t crc = 0;
+	
+	*(ptr + ADDRESS_BYTE) = UNIT_ADDRESS;
+	*(ptr + KOP_BYTE) = 0x8F;
+	*(ptr + KOD_ERROR) = kod_err;
+	crc = CRCProcess(tx_buffer, ERROR_MESSAGE_SIZE - 2);
+	*(ptr + KOD_ERROR + 1) = (uint8_t)(crc);//low CRC;
+	*(ptr + KOD_ERROR + 2) = (uint8_t)(crc >> 8);//high CRC;
+}
+
