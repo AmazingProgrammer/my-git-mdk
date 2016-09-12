@@ -28,6 +28,8 @@ extern RTC_TimeTypeDef cTime;
 extern RTC_DateTypeDef cDate;
 
 #define TEST_WITHOUT_CRC  // Comment for normal work!
+#define CM1K_INTERFACE_SERIAL
+//#define CM1K_INTERFACE_PARALLEL
 
 enum ModbusStates mobus_states;
 enum ModbusErrors modbus_errors;
@@ -185,12 +187,6 @@ void ModbusProcess(void)
 			}
 			else
 			{
-				//tx_buffer[ADDRESS_BYTE] = UNIT_ADDRESS;
-				//tx_buffer[KOP_BYTE] = 0x8F;
-				//tx_buffer[KOD_ERROR] = ModbusErrorRegister;
-				//crc = CRCProcess(tx_buffer, ERROR_MESSAGE_SIZE - 2);
-				//tx_buffer[KOD_ERROR + 1] = (uint8_t)(crc);//low CRC;
-				//tx_buffer[KOD_ERROR + 2] = (uint8_t)(crc >> 8);//high CRC;
 				FormErrorMessage(tx_buffer, 0);
 				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
 			}		
@@ -199,7 +195,6 @@ void ModbusProcess(void)
 		break;
 		case MODE_READ_CLOCK:
 			// Read data from RTC registers
-			//res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 1, 1000);
 			BufferClear(tx_buffer);
 			res = RTC_GetDateTimeToArray(tx_buffer);
 			if (res == HAL_OK)
@@ -211,9 +206,13 @@ void ModbusProcess(void)
 				tx_buffer[3] = number_register;
 				tx_buffer[4] = 0x06;
 				// Process CRC
+				#ifdef TEST_WITHOUT_CRC
 				_crc = CRCProcess(tx_buffer, 17);
 				tx_buffer[17] = (uint8_t)(_crc);
 				tx_buffer[18] = (uint8_t)(_crc >> 8);
+				#else
+				tx_buffer[17] = 0; tx_buffer[18] = 0;
+				#endif
 				// Send data
 				CDC_Transmit_FS(tx_buffer, 19);
 			}
@@ -230,7 +229,11 @@ void ModbusProcess(void)
 			number_register = rx_buffer[3];
 			buffer8[1] = rx_buffer[5];
 			buffer8[0] = rx_buffer[6];
+			#ifdef CM1K_INTERFACE_SERIAL
 			res = HAL_I2C_Mem_Write(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 2, 1000);
+			#else
+			res = HAL_OK;
+			#endif
 			if (res == HAL_OK)
 			{
 				LedControl(3);
@@ -249,7 +252,11 @@ void ModbusProcess(void)
 		case MODE_READ_CM1K:
 			// Read data from RTC registers
 			number_register = rx_buffer[3];
+			#ifdef CM1K_INTERFACE_SERIAL
 			res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 2, 1000);
+			#else
+			res = HAL_OK;
+			#endif
 			if (res == HAL_OK)
 			{
 				LedControl(5);
@@ -262,9 +269,13 @@ void ModbusProcess(void)
 				tx_buffer[5] = buffer8[1];
 				tx_buffer[6] = buffer8[0];
 				// Process CRC
+				#ifdef TEST_WITHOUT_CRC
 				_crc = CRCProcess(tx_buffer, 7);
 				tx_buffer[7] = (uint8_t)(_crc);
 				tx_buffer[8] = (uint8_t)(_crc >> 8);
+				#else
+				tx_buffer[7] = 0; tx_buffer[8] = 0;				
+				#endif
 				// Send data
 				CDC_Transmit_FS(tx_buffer, 9);
 			}
