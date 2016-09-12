@@ -19,7 +19,7 @@ uint8_t Msg2[]="Function RECOGNIZE was done!!\r\n";
 uint8_t Msg3[]="Function SAVE was done!!\r\n";
 uint8_t Msg4[]="Function RESTORE was done!!\r\n";
 uint8_t Msg5[]="Function TEST was done!!\r\n";
-uint8_t buffer8[] = {0};
+uint8_t buffer8[] = {0, 0};
 uint16_t buffer16[] = {0};
 HAL_StatusTypeDef result  = HAL_OK;
 extern I2C_HandleTypeDef hi2c1;
@@ -126,9 +126,9 @@ void ModbusProcess(void)
 			}
 			else if (kop == WRITE_REGISTER)// Write one register
 			{
-				data_length = 4;
-				crc_high_byte = rx_buffer[5];
-				crc_low_byte = rx_buffer[4];
+				data_length = AMOUNT_REGISTERS_BYTE + 1 + rx_buffer[AMOUNT_REGISTERS_BYTE]*2;
+				crc_high_byte = rx_buffer[8];
+				crc_low_byte 	= rx_buffer[7];
 				crc = (crc_high_byte << 8) | crc_low_byte;
 				_crc = CRCProcess(rx_buffer, data_length);
 				#ifdef TEST_WITHOUT_CRC
@@ -137,9 +137,19 @@ void ModbusProcess(void)
 				#endif
 				if (_crc == crc)
 				{
-					number_register = rx_buffer[2];
-					//data_register = rx_buffer[3];
-					state = MODE_WRITE_CM1K;
+					if (rx_buffer[START_REGISTER_H_BYTE] == 0x01) // Write to clock registers
+					{
+						state = MODE_WRITE_CLOCK;
+					}
+					else if (rx_buffer[START_REGISTER_H_BYTE] == 0x00) // Write to CM1K registers
+					{
+						state = MODE_WRITE_CM1K;
+					}
+					else
+					{
+						BufferClear(rx_buffer);
+						state = WAIT_MESSAGE;
+					}
 				}
 				else
 				{
@@ -183,7 +193,7 @@ void ModbusProcess(void)
 			//FlagModbusRecieveData = 0;			
 			state = WAIT_MESSAGE;	
 		break;
-		case 5:
+		case MODE_READ_CLOCK:
 			// Read data from RTC registers
 			//res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 1, 1000);
 			BufferClear(tx_buffer);
@@ -192,23 +202,67 @@ void ModbusProcess(void)
 			{
 				tx_buffer[0] = UNIT_ADDRESS;
 				tx_buffer[1] = READ_REGISTER;
-				tx_buffer[2] = number_register;
-				tx_buffer[3] = buffer8[0];
-				tx_buffer[4] = 0x00;
-				tx_buffer[5] = 0x00;
-				//CRC16();
+				tx_buffer[2] = 0x01;
+				tx_buffer[3] = number_register;
+				tx_buffer[4] = 0x06;
+				// Process CRC
+				_crc = CRCProcess(tx_buffer, 17);
+				tx_buffer[17] = (uint8_t)(_crc);
+				tx_buffer[18] = (uint8_t)(_crc >> 8);
+				// Send data
 				CDC_Transmit_FS(tx_buffer, 19);
 			}
 			else
 			{
-				
+				// Send Error array
+				CDC_Transmit_FS(tx_buffer, 19);
 			}
 			state = WAIT_MESSAGE;	
 		break;
 		case MODE_WRITE_CM1K:
+			// Write data to CM1K register
+			number_register = rx_buffer[3];
+			buffer8[1] = rx_buffer[5];
+			buffer8[0] = rx_buffer[6];
+			res = HAL_I2C_Mem_Write(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 2, 1000);
+			if (res == 0)
+			{
+				// Send received array
+				// CDC_Transmit_FS(tx_buffer, 19);
+			}
+			else
+			{
+				// Send Error array
+				// CDC_Transmit_FS(tx_buffer, 19);
+			}
 			state = WAIT_MESSAGE;
 		break;
 		case MODE_READ_CM1K:
+			// Read data from RTC registers
+			number_register = rx_buffer[3];
+			res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 2, 1000);
+			if (res == 0)
+			{
+				tx_buffer[0] = UNIT_ADDRESS;
+				tx_buffer[1] = READ_REGISTER;
+				tx_buffer[2] = 0x00;
+				tx_buffer[3] = number_register;
+				tx_buffer[4] = 0x01;
+				// Prepare data from register
+				tx_buffer[5] = buffer8[1];
+				tx_buffer[6] = buffer8[0];
+				// Process CRC
+				_crc = CRCProcess(tx_buffer, 7);
+				tx_buffer[7] = (uint8_t)(_crc);
+				tx_buffer[8] = (uint8_t)(_crc >> 8);
+				// Send data
+				CDC_Transmit_FS(tx_buffer, 9);
+			}
+			else
+			{
+				// Send Error array
+				//CDC_Transmit_FS(tx_buffer, 19);
+			}
 			state = WAIT_MESSAGE;
 		break;
 		default:
