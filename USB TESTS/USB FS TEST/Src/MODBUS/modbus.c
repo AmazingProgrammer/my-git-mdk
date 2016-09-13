@@ -108,13 +108,17 @@ void ModbusProcess(void)
 				#endif
 				if (_crc == crc)
 				{
-					if (rx_buffer[START_REGISTER_H_BYTE] == 0x01) // Write to clock registers
+					if (rx_buffer[START_REGISTER_H_BYTE] == GRUP_CLOCK_REGISTERS) // Write to clock registers
 					{
 						state = MODE_WRITE_CLOCK;
 					}
-					else if (rx_buffer[START_REGISTER_H_BYTE] == 0x00) // Write to CM1K registers
+					else if (rx_buffer[START_REGISTER_H_BYTE] == GRUP_CM1K_REGISTERS) // Write to CM1K registers
 					{
 						state = MODE_WRITE_CM1K;
+					}
+					else if (rx_buffer[START_REGISTER_H_BYTE] == GRUP_PARAM_REGISTERS) // Write to parameter registers
+					{
+						state = MODE_WRITE_PARAM;
 					}
 					else
 					{
@@ -256,6 +260,8 @@ void ModbusProcess(void)
 			res = HAL_I2C_Mem_Read(&hi2c1, I2C_ADDRESS, number_register, 1, buffer8, 2, 1000);
 			#else
 			res = HAL_OK;
+			buffer8[1] = 0xAB;
+			buffer8[0] = 0xCD;
 			#endif
 			if (res == HAL_OK)
 			{
@@ -285,6 +291,9 @@ void ModbusProcess(void)
 				FormErrorMessage(tx_buffer, 0);
 				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
 			}
+			state = WAIT_MESSAGE;
+		break;
+		case MODE_WRITE_PARAM:
 			state = WAIT_MESSAGE;
 		break;
 		default:
