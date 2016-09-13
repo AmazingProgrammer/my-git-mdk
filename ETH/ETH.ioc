@@ -1,6 +1,10 @@
 #MicroXplorer Configuration settings - do not modify
 File.Version=6
 KeepUserPlacement=false
+LWIP.IPParameters=LWIP_DHCP,IP_ADDRESS,NETMASK_ADDRESS
+LWIP.IP_ADDRESS=192.168.000.010
+LWIP.LWIP_DHCP=0
+LWIP.NETMASK_ADDRESS=255.255.255.000
 LWIP.Version=v1.5.0_RC0_20160211
 Mcu.Family=STM32F4
 Mcu.IP0=ETH
