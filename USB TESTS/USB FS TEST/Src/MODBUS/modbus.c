@@ -196,7 +196,6 @@ void ModbusProcess(void)
 				FormErrorMessage(tx_buffer, 0);
 				CDC_Transmit_FS(tx_buffer, ERROR_MESSAGE_SIZE);
 			}		
-			//FlagModbusRecieveData = 0;			
 			state = WAIT_MESSAGE;	
 		break;
 		case MODE_READ_CLOCK:
