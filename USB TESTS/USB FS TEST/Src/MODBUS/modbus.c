@@ -183,12 +183,14 @@ void ModbusProcess(void)
 			res = RTC_SetDateTime(rx_buffer[AMOUNT_REGISTERS_BYTE+2],rx_buffer[AMOUNT_REGISTERS_BYTE+4],
 														rx_buffer[AMOUNT_REGISTERS_BYTE+6],rx_buffer[AMOUNT_REGISTERS_BYTE+8],
 														rx_buffer[AMOUNT_REGISTERS_BYTE+10],rx_buffer[AMOUNT_REGISTERS_BYTE+12]);
+			// If writing was successful
 			if (res == HAL_OK)
 			{
 				LedControl(3);
 				RXbufferCopy(19);
 				CDC_Transmit_FS(tx_buffer, 19);
 			}
+			// If writing wasn't successful
 			else
 			{
 				FormErrorMessage(tx_buffer, 0);
@@ -201,6 +203,7 @@ void ModbusProcess(void)
 			// Read data from RTC registers
 			BufferClear(tx_buffer);
 			res = RTC_GetDateTimeToArray(tx_buffer);
+			// If reading was successful
 			if (res == HAL_OK)
 			{
 				LedControl(5);
@@ -220,6 +223,7 @@ void ModbusProcess(void)
 				// Send data
 				CDC_Transmit_FS(tx_buffer, 19);
 			}
+			// If reading wasn't successful
 			else
 			{
 				// Send Error array
@@ -238,6 +242,7 @@ void ModbusProcess(void)
 			#else
 			res = HAL_OK;
 			#endif
+			// If writing was successful
 			if (res == HAL_OK)
 			{
 				LedControl(3);
@@ -245,6 +250,7 @@ void ModbusProcess(void)
 				// Send received array
 				CDC_Transmit_FS(tx_buffer, 9);
 			}
+			// If writing wasn't successful
 			else
 			{
 				// Send Error array
@@ -263,6 +269,7 @@ void ModbusProcess(void)
 			buffer8[1] = 0xAB;
 			buffer8[0] = 0xCD;
 			#endif
+			// If reading was successful
 			if (res == HAL_OK)
 			{
 				LedControl(5);
@@ -285,6 +292,7 @@ void ModbusProcess(void)
 				// Send data
 				CDC_Transmit_FS(tx_buffer, 9);
 			}
+			// If reading wasn't successful
 			else
 			{
 				// Send Error array

@@ -1320,7 +1320,7 @@ I (../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h)(0x5767C5
 I (../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h)(0x5767C544)
 I (../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h)(0x5767C544)
 I (../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h)(0x5767C544)
-I (../Src/MODBUS/modbus.h)(0x57D787C9)
+I (../Src/MODBUS/modbus.h)(0x57D8CAC2)
 I (../Src/LCD/LCD.h)(0x57749FCC)
 I (C:\Keil\ARM\ARMCC\include\math.h)(0x51C7EF84)
 I (../Src/LCD/AsciiLib.h)(0x4E2E6776)
@@ -1603,7 +1603,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x578E763A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h)(0x578E763A)
 I (../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h)(0x5767C544)
 I (../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h)(0x5767C544)
-I (../Src/MODBUS/modbus.h)(0x57D787C9)
+I (../Src/MODBUS/modbus.h)(0x57D8CAC2)
 I (../Src/user_functions.h)(0x57D64D9E)
 F (..\Src\user_functions.c)(0x57D64D85)(-c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Src -I../Src/LCD -I../Src/CM1K -I../Src/MODBUS -I../Src/TIMERS --C99-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-DUSE_HAL_DRIVER -DSTM32F407xx-o usb_fs_test\user_functions.o --omf_browse usb_fs_test\user_functions.crf --depend usb_fs_test\user_functions.d)
 I (..\Src\user_functions.h)(0x57D64D9E)
@@ -1646,7 +1646,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x578E763A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h)(0x578E763A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h)(0x578E763A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h)(0x578E763A)
-I (../Src/MODBUS/modbus.h)(0x57D787C9)
+I (../Src/MODBUS/modbus.h)(0x57D8CAC2)
 I (../Src/TIMERS/timers.h)(0x57790B00)
 I (../Src/LCD/LCD.h)(0x57749FCC)
 I (C:\Keil\ARM\ARMCC\include\math.h)(0x51C7EF84)
@@ -1747,8 +1747,8 @@ I (../Src/LCD/LCD.h)(0x57749FCC)
 I (C:\Keil\ARM\ARMCC\include\math.h)(0x51C7EF84)
 I (../Src/LCD/AsciiLib.h)(0x4E2E6776)
 I (C:\Keil\ARM\ARMCC\include\string.h)(0x51C7EF84)
-F (..\Src\MODBUS\modbus.c)(0x57D7880F)(-c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Src -I../Src/LCD -I../Src/CM1K -I../Src/MODBUS -I../Src/TIMERS --C99-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-DUSE_HAL_DRIVER -DSTM32F407xx-o usb_fs_test\modbus.o --omf_browse usb_fs_test\modbus.crf --depend usb_fs_test\modbus.d)
-I (..\Src\MODBUS\modbus.h)(0x57D787C9)
+F (..\Src\MODBUS\modbus.c)(0x57D8CA3E)(-c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../Drivers/CMSIS/Include -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Src -I../Src/LCD -I../Src/CM1K -I../Src/MODBUS -I../Src/TIMERS --C99-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-DUSE_HAL_DRIVER -DSTM32F407xx-o usb_fs_test\modbus.o --omf_browse usb_fs_test\modbus.crf --depend usb_fs_test\modbus.d)
+I (..\Src\MODBUS\modbus.h)(0x57D8CAC2)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x578E763A)
 I (../Inc/stm32f4xx_hal_conf.h)(0x57CEDF52)
 I (../Inc/mxconstants.h)(0x576A50DE)

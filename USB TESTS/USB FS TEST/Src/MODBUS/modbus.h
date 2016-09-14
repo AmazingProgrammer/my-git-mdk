@@ -29,11 +29,6 @@ File "modbus.h"
 #define CRC_L_BYTE (6)
 #define KOD_ERROR (2)
 
-#define WRITE_SINGLE_REGISTER_BYTES	(8)
-
-#define CONTROL_REGISTER_ADDRESS 		(0x0100)
-#define STATE_REGISTER_ADDRESS 			(0x0200)
-
 //
 #define GRUP_CM1K_REGISTERS		(0x00)
 #define GRUP_CLOCK_REGISTERS	(0x01)
