@@ -303,6 +303,9 @@ void ModbusProcess(void)
 		case MODE_WRITE_PARAM:
 			state = WAIT_MESSAGE;
 		break;
+		case MODE_READ_PARAM:
+			state = WAIT_MESSAGE;
+		break;
 		default:
 		{
 			state = INIT;
