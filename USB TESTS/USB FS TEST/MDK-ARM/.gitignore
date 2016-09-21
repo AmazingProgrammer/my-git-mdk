@@ -2,3 +2,4 @@
 *.bak
 /USB_FS_TEST.uvgui.Иванов
 /USB_FS_TEST.uvopt
+*.dep
